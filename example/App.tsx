@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native';
 import GalaxyBackgroundView, { GalaxyDirection, GalaxyTheme } from './GalaxyBackgroundView';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
@@ -31,73 +31,71 @@ export default function App() {
         speedMultiplier={1.0}
         style={styles.container}
       >
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.screen}>
+        <View style={styles.screen}>
 
-            {/* ── Top Library Header ── */}
-            <Animated.View entering={FadeIn.duration(800)} style={styles.topHeader}>
-              <Text style={styles.libraryTag}>REACT NATIVE</Text>
-              <Text style={styles.libraryTitle}>Galaxy Background</Text>
-            </Animated.View>
+          {/* ── Top Library Header ── */}
+          <Animated.View entering={FadeIn.duration(800)} style={styles.topHeader}>
+            <Text style={styles.libraryTag}>REACT NATIVE</Text>
+            <Text style={styles.libraryTitle}>Galaxy Background</Text>
+          </Animated.View>
 
-            {/* ── Center Feature Card ── */}
-            <Animated.View entering={FadeInUp.delay(300).duration(800)} style={styles.heroCard}>
-              <Text style={styles.heroBadge}>60 - 120 FPS GPU Accelerated</Text>
-              <Text style={styles.heroTitle}>Deep Space Canvas</Text>
-              <Text style={styles.heroSubtitle}>
-                Powered by React Native Skia & C++ Reanimated Worklets for native 60–120 FPS performance.
-              </Text>
+          {/* ── Center Feature Card ── */}
+          <Animated.View entering={FadeInUp.delay(300).duration(800)} style={styles.heroCard}>
+            <Text style={styles.heroBadge}>60 - 120 FPS GPU Accelerated</Text>
+            <Text style={styles.heroTitle}>Deep Space Canvas</Text>
+            <Text style={styles.heroSubtitle}>
+              Powered by React Native Skia & C++ Reanimated Worklets for native 60–120 FPS performance.
+            </Text>
 
-              {/* Theme Selector Pills */}
-              <View style={styles.controlGroup}>
-                <Text style={styles.controlLabel}>Color Theme</Text>
-                <View style={styles.pillRow}>
-                  {themes.map((t) => (
-                    <TouchableOpacity
-                      key={t.id}
-                      activeOpacity={0.8}
-                      onPress={() => setCurrentTheme(t.id)}
-                      style={[styles.pillBtn, currentTheme === t.id && styles.pillBtnActive]}
-                    >
-                      <Text style={[styles.pillText, currentTheme === t.id && styles.pillTextActive]}>
-                        {t.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+            {/* Theme Selector Pills */}
+            <View style={styles.controlGroup}>
+              <Text style={styles.controlLabel}>Color Theme</Text>
+              <View style={styles.pillRow}>
+                {themes.map((t) => (
+                  <TouchableOpacity
+                    key={t.id}
+                    activeOpacity={0.8}
+                    onPress={() => setCurrentTheme(t.id)}
+                    style={[styles.pillBtn, currentTheme === t.id && styles.pillBtnActive]}
+                  >
+                    <Text style={[styles.pillText, currentTheme === t.id && styles.pillTextActive]}>
+                      {t.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-
-              {/* Direction Selector Pills */}
-              <View style={styles.controlGroup}>
-                <Text style={styles.controlLabel}>Motion Direction</Text>
-                <View style={styles.pillRow}>
-                  {directions.map((d) => (
-                    <TouchableOpacity
-                      key={d.id}
-                      activeOpacity={0.8}
-                      onPress={() => setCurrentDirection(d.id)}
-                      style={[styles.pillBtn, currentDirection === d.id && styles.pillBtnActive]}
-                    >
-                      <Text style={[styles.pillText, currentDirection === d.id && styles.pillTextActive]}>
-                        {d.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </Animated.View>
-
-            {/* ── Bottom Action Buttons ── */}
-            <View style={styles.bottomSection}>
-              <Animated.View entering={FadeInUp.delay(500).duration(800)}>
-                <TouchableOpacity activeOpacity={0.85} style={styles.primaryBtn}>
-                  <Text style={styles.primaryBtnText}>Get Started with NPM</Text>
-                </TouchableOpacity>
-              </Animated.View>
             </View>
 
+            {/* Direction Selector Pills */}
+            <View style={styles.controlGroup}>
+              <Text style={styles.controlLabel}>Motion Direction</Text>
+              <View style={styles.pillRow}>
+                {directions.map((d) => (
+                  <TouchableOpacity
+                    key={d.id}
+                    activeOpacity={0.8}
+                    onPress={() => setCurrentDirection(d.id)}
+                    style={[styles.pillBtn, currentDirection === d.id && styles.pillBtnActive]}
+                  >
+                    <Text style={[styles.pillText, currentDirection === d.id && styles.pillTextActive]}>
+                      {d.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </Animated.View>
+
+          {/* ── Bottom Action Buttons ── */}
+          <View style={styles.bottomSection}>
+            <Animated.View entering={FadeInUp.delay(500).duration(800)}>
+              <TouchableOpacity activeOpacity={0.85} style={styles.primaryBtn}>
+                <Text style={styles.primaryBtnText}>Get Started with NPM</Text>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
-        </SafeAreaView>
+
+        </View>
       </GalaxyBackgroundView>
     </>
   );
@@ -105,12 +103,11 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  safeArea: { flex: 1 },
   screen: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 24,
+    paddingTop: 54,
+    paddingBottom: 28,
     justifyContent: 'space-between',
   },
 
