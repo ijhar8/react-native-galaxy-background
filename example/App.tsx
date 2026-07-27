@@ -15,23 +15,24 @@ import Animated, {
 } from 'react-native-reanimated';
 
 // ─── Constants ───
-const BAR_WIDTH = 44;
-const LEFT_BAR_HEIGHT = 220;  // Taller left bar
-const RIGHT_BAR_HEIGHT = 155; // Shorter right bar
-const BAR_RADIUS = BAR_WIDTH / 2;
+const BAR_WIDTH = 42; // Thicker 3D volumetric capsule pillar
+const LEFT_BAR_HEIGHT = 215;  // Taller left bar
+const RIGHT_BAR_HEIGHT = 150; // Shorter right bar
 
-// ─── 3D Volumetric Capsule Pill Component ───
-const VolumetricCapsule = ({ height, style }: { height: number; style?: any }) => {
+// ─── 3D Volumetric Porcelain Clay Capsule Pill Component ───
+const VolumetricCapsule = ({ height }: { height: number }) => {
   return (
-    <View style={[styles.capsule3DContainer, { height }, style]}>
-      {/* 3D Directional Lighting Layer (White to Soft Slate Shadow) */}
+    <View style={[styles.capsule3DContainer, { height }]}>
+      {/* 3D Clay Porcelain Base Body */}
       <View style={styles.capsuleBase3D}>
-        {/* Top-Left Specular Light Reflection */}
+        {/* Right Edge Cylindrical Curve Shadow */}
+        <View style={styles.capsuleCylinderShade} />
+        {/* Left Specular Light Reflection Stripe */}
         <View style={styles.capsuleSpecularLight} />
-        {/* Right Edge Ambient Occlusion Shadow (Gives 3D Cylindrical Curve) */}
-        <View style={styles.capsuleRightShadow} />
-        {/* Top Rounded Cap Highlight */}
-        <View style={styles.capsuleCapHighlight} />
+        {/* Top Dome Sphere Highlight */}
+        <View style={styles.capsuleTopDome} />
+        {/* Bottom Dome Occlusion Shadow */}
+        <View style={styles.capsuleBottomDome} />
       </View>
     </View>
   );
@@ -44,6 +45,7 @@ export default function App() {
 
   const playIntroAnimation = () => {
     introProgress.value = 0;
+    // 4-second 360° 3D spin & zoom out intro
     introProgress.value = withTiming(1, {
       duration: 4000,
       easing: Easing.out(Easing.cubic),
@@ -53,13 +55,13 @@ export default function App() {
   useEffect(() => {
     playIntroAnimation();
 
-    // Ambient 3D floating motion after intro completes
+    // Subtle 3D ambient float motion after intro completes
     floatY.value = withDelay(
       4200,
       withRepeat(
         withSequence(
-          withTiming(-10, { duration: 2600, easing: Easing.inOut(Easing.ease) }),
-          withTiming(10, { duration: 2600, easing: Easing.inOut(Easing.ease) }),
+          withTiming(-8, { duration: 2600, easing: Easing.inOut(Easing.ease) }),
+          withTiming(8, { duration: 2600, easing: Easing.inOut(Easing.ease) }),
         ),
         -1,
         true,
@@ -104,7 +106,7 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <GalaxyBackgroundView theme="blue" numStars={350} style={styles.container}>
+      <GalaxyBackgroundView theme="blue" numStars={200} style={styles.container}>
         <View style={styles.screen}>
 
           {/* ── Top Brand Title ── */}
@@ -202,57 +204,70 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 
-  // ─── 3D Volumetric Cylinder Shading ───
+  // ─── 3D Volumetric Claymorphic Capsule Pill Styles ───
   capsule3DContainer: {
     width: BAR_WIDTH,
-    borderRadius: BAR_RADIUS,
-    shadowColor: '#030b18',
-    shadowOffset: { width: 4, height: 16 },
+    borderRadius: BAR_WIDTH / 2,
+    shadowColor: '#020914',
+    shadowOffset: { width: 8, height: 20 },
     shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 20,
+    shadowRadius: 24,
+    elevation: 24,
   },
 
   capsuleBase3D: {
     flex: 1,
-    borderRadius: BAR_RADIUS,
-    backgroundColor: '#ffffff',
+    borderRadius: BAR_WIDTH / 2,
+    backgroundColor: '#edf2f7',
     overflow: 'hidden',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.95)',
   },
 
-  capsuleSpecularLight: {
-    position: 'absolute',
-    left: 3,
-    top: 4,
-    bottom: 4,
-    width: 12,
-    borderRadius: 6,
-    backgroundColor: '#ffffff',
-    shadowColor: '#ffffff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
-  },
-
-  capsuleRightShadow: {
+  // 3D Cylindrical Curve Shadow (Shaded Right Side)
+  capsuleCylinderShade: {
     position: 'absolute',
     right: 0,
     top: 0,
     bottom: 0,
-    width: 16,
-    backgroundColor: 'rgba(180, 200, 220, 0.45)',
+    width: BAR_WIDTH * 0.45,
+    backgroundColor: 'rgba(150, 172, 195, 0.55)',
   },
 
-  capsuleCapHighlight: {
+  // Left Edge Specular Reflection Stripe
+  capsuleSpecularLight: {
     position: 'absolute',
-    top: 3,
-    left: 4,
-    right: 4,
-    height: 18,
-    borderRadius: 9,
+    left: 3,
+    top: 6,
+    bottom: 6,
+    width: 11,
+    borderRadius: 5.5,
+    backgroundColor: '#ffffff',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.95,
+    shadowRadius: 5,
+  },
+
+  // Top Dome Cap 3D Sphere Highlight
+  capsuleTopDome: {
+    position: 'absolute',
+    top: 2,
+    left: 3,
+    right: 3,
+    height: BAR_WIDTH - 4,
+    borderRadius: (BAR_WIDTH - 4) / 2,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
+  },
+
+  // Bottom Cap Ambient Occlusion Shadow
+  capsuleBottomDome: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: BAR_WIDTH * 0.7,
+    backgroundColor: 'rgba(120, 142, 168, 0.35)',
   },
 
   tagline: {
