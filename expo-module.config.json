@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["GalaxyBackgroundModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.galaxybackground.GalaxyBackgroundModule"]
+  }
+}
