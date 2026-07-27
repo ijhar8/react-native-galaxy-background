@@ -99,11 +99,11 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      {/* Testing with 1,500 Total Particles (1000 Stars + 500 Cosmic Dust) */}
+      {/* Testing with Sunset Orange Theme (theme="orange") */}
       <GalaxyBackgroundView
-        theme="blue"
-        numStars={1000}
-        numDust={500}
+        theme="orange"
+        numStars={300}
+        numDust={150}
         direction="360"
         speedMultiplier={1.0}
         style={styles.container}
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  primaryBtnText: { color: '#0a2a52', fontSize: 17, fontWeight: '600' },
+  primaryBtnText: { color: '#4a1020', fontSize: 17, fontWeight: '600' },
 
   secondaryBtn: {
     height: 56,
