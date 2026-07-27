@@ -99,11 +99,11 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      {/* Testing with Sunset Orange Theme (theme="orange") */}
+      {/* ⚡ TESTING WITH 10,000 PARTICLES USING GPU INSTANCED BATCHING MODE ⚡ */}
       <GalaxyBackgroundView
         theme="orange"
-        numStars={300}
-        numDust={150}
+        numStars={6000}
+        numDust={4000}
         direction="360"
         speedMultiplier={1.0}
         style={styles.container}
