@@ -16,36 +16,35 @@ import Animated, {
 
 // ─── Constants ───
 const BAR_WIDTH = 42; // Thicker 3D volumetric capsule pillar
-const LEFT_BAR_HEIGHT = 215;  // Taller left bar
-const RIGHT_BAR_HEIGHT = 150; // Shorter right bar
+const LEFT_BAR_HEIGHT = 220;  // Taller left bar
+const RIGHT_BAR_HEIGHT = 155; // Shorter right bar
+const BAR_RADIUS = BAR_WIDTH / 2;
 
-// ─── 3D Volumetric Porcelain Clay Capsule Pill Component ───
+// ─── 3D Matte Porcelain Clay Capsule Component ───
 const VolumetricCapsule = ({ height }: { height: number }) => {
   return (
     <View style={[styles.capsule3DContainer, { height }]}>
-      {/* 3D Clay Porcelain Base Body */}
+      {/* 3D Directional Cylindrical Shading Body */}
       <View style={styles.capsuleBase3D}>
-        {/* Right Edge Cylindrical Curve Shadow */}
-        <View style={styles.capsuleCylinderShade} />
-        {/* Left Specular Light Reflection Stripe */}
-        <View style={styles.capsuleSpecularLight} />
-        {/* Top Dome Sphere Highlight */}
-        <View style={styles.capsuleTopDome} />
-        {/* Bottom Dome Occlusion Shadow */}
-        <View style={styles.capsuleBottomDome} />
+        {/* Soft Left Light Highlight */}
+        <View style={styles.capsuleLeftHighlight} />
+        {/* Soft Right 3D Cylinder Curve Shadow */}
+        <View style={styles.capsuleRightShadow} />
+        {/* Top Dome Cap Soft Glow */}
+        <View style={styles.capsuleTopCapGlow} />
       </View>
     </View>
   );
 };
 
 export default function App() {
-  // Intro progress: 0 (zoomed in close, 3D angled) → 1 (zoomed out, resting position)
+  // 3D Intro progress: 0 (zoomed in, 3D rotated, parallel) → 1 (zoomed out, resting position)
   const introProgress = useSharedValue(0);
   const floatY = useSharedValue(0);
 
   const playIntroAnimation = () => {
     introProgress.value = 0;
-    // 4-second 360° 3D spin & zoom out intro
+    // 4-second cinematic 3D movie intro: Zoom + 3D Y-Axis Orbit + Spread
     introProgress.value = withTiming(1, {
       duration: 4000,
       easing: Easing.out(Easing.cubic),
@@ -55,7 +54,7 @@ export default function App() {
   useEffect(() => {
     playIntroAnimation();
 
-    // Subtle 3D ambient float motion after intro completes
+    // Ambient floating motion after intro completes
     floatY.value = withDelay(
       4200,
       withRepeat(
@@ -69,12 +68,15 @@ export default function App() {
     );
   }, []);
 
-  // ─── 4-Second 3D Orbit Spin & Zoom Out ───
+  // ─── Cinematic 3D Zoom & Orbit Rotation (Frame-by-Frame Reference Match) ───
   const containerAnimatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(introProgress.value, [0, 1], [3.4, 1.0]);
-    const rotateY = interpolate(introProgress.value, [0, 1], [0, 360]);
-    const rotateX = interpolate(introProgress.value, [0, 0.5, 1], [-15, 10, 0]);
-    const translateY = interpolate(introProgress.value, [0, 1], [35, 0]);
+    // 1. Scale: Zooms out from 3.8x (Frame 1 close-up) down to 1.0x (Frame 4 final)
+    const scale = interpolate(introProgress.value, [0, 0.4, 1], [3.8, 2.0, 1.0]);
+    // 2. 3D Y-Axis Orbit Rotation: -65deg → -25deg → 0deg
+    const rotateY = interpolate(introProgress.value, [0, 0.5, 1], [-65, -25, 0]);
+    // 3. 3D X-Axis Tilt: 20deg → 0deg
+    const rotateX = interpolate(introProgress.value, [0, 1], [20, 0]);
+    const translateY = interpolate(introProgress.value, [0, 1], [40, 0]);
 
     return {
       transform: [
@@ -87,18 +89,22 @@ export default function App() {
     };
   });
 
-  // Left bar tilt angle
+  // ─── Left Bar: Starts nearly vertical (-5°), opens out to +22° ───
   const leftBarStyle = useAnimatedStyle(() => {
-    const rotateZ = interpolate(introProgress.value, [0, 1], [12, 22]);
+    const rotateZ = interpolate(introProgress.value, [0, 1], [-5, 22]);
+    const leftOffset = interpolate(introProgress.value, [0, 1], [15, 45]);
     return {
+      left: leftOffset,
       transform: [{ rotateZ: `${rotateZ}deg` }],
     };
   });
 
-  // Right bar tilt angle
+  // ─── Right Bar: Starts nearly vertical (+5°), opens out to -22° ───
   const rightBarStyle = useAnimatedStyle(() => {
-    const rotateZ = interpolate(introProgress.value, [0, 1], [-12, -22]);
+    const rotateZ = interpolate(introProgress.value, [0, 1], [5, -22]);
+    const rightOffset = interpolate(introProgress.value, [0, 1], [15, 45]);
     return {
+      right: rightOffset,
       transform: [{ rotateZ: `${rotateZ}deg` }],
     };
   });
@@ -114,7 +120,7 @@ export default function App() {
             <Text style={styles.brandTitle}>A M I N A</Text>
           </Animated.View>
 
-          {/* ── Center: 3D Volumetric Capsule Logo (Tap to Replay) ── */}
+          {/* ── Center: 3D Volumetric Capsule Logo (Tap to Replay Intro) ── */}
           <TouchableOpacity 
             activeOpacity={0.9} 
             onPress={playIntroAnimation} 
@@ -122,12 +128,12 @@ export default function App() {
           >
             <Animated.View style={[styles.capsulePair, containerAnimatedStyle]}>
               {/* Left Bar (Taller 3D Capsule) */}
-              <Animated.View style={[styles.capsuleWrapper, styles.leftBar, leftBarStyle]}>
+              <Animated.View style={[styles.capsuleWrapper, leftBarStyle]}>
                 <VolumetricCapsule height={LEFT_BAR_HEIGHT} />
               </Animated.View>
 
               {/* Right Bar (Shorter 3D Capsule) */}
-              <Animated.View style={[styles.capsuleWrapper, styles.rightBar, rightBarStyle]}>
+              <Animated.View style={[styles.capsuleWrapper, rightBarStyle]}>
                 <VolumetricCapsule height={RIGHT_BAR_HEIGHT} />
               </Animated.View>
             </Animated.View>
@@ -193,81 +199,56 @@ const styles = StyleSheet.create({
 
   capsuleWrapper: {
     position: 'absolute',
-  },
-
-  leftBar: {
-    left: 45,
-    bottom: 0,
-  },
-  rightBar: {
-    right: 45,
     bottom: 0,
   },
 
-  // ─── 3D Volumetric Claymorphic Capsule Pill Styles ───
+  // ─── 3D Matte Claymorphic Volumetric Cylinder Shading ───
   capsule3DContainer: {
     width: BAR_WIDTH,
-    borderRadius: BAR_WIDTH / 2,
+    borderRadius: BAR_RADIUS,
     shadowColor: '#020914',
-    shadowOffset: { width: 8, height: 20 },
-    shadowOpacity: 0.45,
-    shadowRadius: 24,
-    elevation: 24,
+    shadowOffset: { width: 6, height: 18 },
+    shadowOpacity: 0.35,
+    shadowRadius: 22,
+    elevation: 22,
   },
 
   capsuleBase3D: {
     flex: 1,
-    borderRadius: BAR_WIDTH / 2,
-    backgroundColor: '#edf2f7',
+    borderRadius: BAR_RADIUS,
+    backgroundColor: '#f2f6fa',
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
   },
 
-  // 3D Cylindrical Curve Shadow (Shaded Right Side)
-  capsuleCylinderShade: {
+  // Soft Directional 3D Cylinder Shadow Curve (Right Edge)
+  capsuleRightShadow: {
     position: 'absolute',
     right: 0,
     top: 0,
     bottom: 0,
-    width: BAR_WIDTH * 0.45,
-    backgroundColor: 'rgba(150, 172, 195, 0.55)',
+    width: BAR_WIDTH * 0.42,
+    backgroundColor: 'rgba(155, 175, 198, 0.45)',
   },
 
-  // Left Edge Specular Reflection Stripe
-  capsuleSpecularLight: {
+  // Left Side Specular Light Soft Glow
+  capsuleLeftHighlight: {
     position: 'absolute',
-    left: 3,
-    top: 6,
-    bottom: 6,
-    width: 11,
-    borderRadius: 5.5,
-    backgroundColor: '#ffffff',
-    shadowColor: '#ffffff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.95,
-    shadowRadius: 5,
-  },
-
-  // Top Dome Cap 3D Sphere Highlight
-  capsuleTopDome: {
-    position: 'absolute',
-    top: 2,
-    left: 3,
-    right: 3,
-    height: BAR_WIDTH - 4,
-    borderRadius: (BAR_WIDTH - 4) / 2,
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: BAR_WIDTH * 0.3,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
 
-  // Bottom Cap Ambient Occlusion Shadow
-  capsuleBottomDome: {
+  // Top Cap Rounded Dome Highlight
+  capsuleTopCapGlow: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: BAR_WIDTH * 0.7,
-    backgroundColor: 'rgba(120, 142, 168, 0.35)',
+    height: BAR_WIDTH,
+    borderRadius: BAR_RADIUS,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
   },
 
   tagline: {
