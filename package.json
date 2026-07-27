@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "My new module",
   "main": "build/index.js",
+  "react-native": "src/index.ts",
   "types": "build/index.d.ts",
   "scripts": {
     "build": "node internal/module_scripts/build.js",
@@ -26,9 +27,9 @@
   "author": "User <user@example.com> (francoisjacquet)",
   "license": "MIT",
   "homepage": "https://github.com/user/react-native-galaxy-background#readme",
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@shopify/react-native-skia": "*",
     "@types/jest": "^29.2.1",
     "@types/react": "~19.1.1",
     "babel-preset-expo": "~55.0.8",
@@ -38,7 +39,10 @@
     "jest": "^29.7.0",
     "jest-expo": "~55.0.9",
     "prettier": "^3.0.0",
-    "react-native": "0.82.1",
+    "react-native": "0.86.0",
+    "react-native-reanimated": "*",
+    "react-native-worklets": "^0.11.3",
+    "react-refresh": "^0.18.0",
     "typescript": "^5.9.2"
   },
   "jest": {
@@ -48,8 +52,10 @@
     ]
   },
   "peerDependencies": {
+    "@shopify/react-native-skia": "*",
     "expo": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-reanimated": "*"
   }
 }
