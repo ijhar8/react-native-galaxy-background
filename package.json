@@ -1,10 +1,16 @@
 {
-  "name": "my-module",
-  "version": "0.1.0",
-  "description": "My new module",
+  "name": "react-native-galaxy-background",
+  "version": "1.0.0",
+  "description": "High-performance 60-120 FPS GPU-accelerated Galaxy Background component for React Native & Expo powered by Skia and Reanimated",
   "main": "build/index.js",
   "react-native": "src/index.ts",
   "types": "build/index.d.ts",
+  "files": [
+    "src",
+    "build",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node internal/module_scripts/build.js",
     "clean": "node internal/module_scripts/clean.js",
@@ -17,16 +23,25 @@
   "keywords": [
     "react-native",
     "expo",
-    "my-module",
-    "GalaxyBackground"
+    "galaxy",
+    "background",
+    "skia",
+    "reanimated",
+    "stars",
+    "space",
+    "particles",
+    "animation"
   ],
-  "repository": "https://github.com/user/react-native-galaxy-background",
-  "bugs": {
-    "url": "https://github.com/user/react-native-galaxy-background/issues"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ijhar8/react-native-galaxy-background"
   },
-  "author": "User <user@example.com> (francoisjacquet)",
+  "bugs": {
+    "url": "https://github.com/ijhar8/react-native-galaxy-background/issues"
+  },
+  "author": "Ijhar Ansari <ijharansari8@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/user/react-native-galaxy-background#readme",
+  "homepage": "https://github.com/ijhar8/react-native-galaxy-background#readme",
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@shopify/react-native-skia": "*",
@@ -44,12 +59,6 @@
     "react-native-worklets": "^0.11.3",
     "react-refresh": "^0.18.0",
     "typescript": "^5.9.2"
-  },
-  "jest": {
-    "preset": "jest-expo",
-    "roots": [
-      "<rootDir>/src"
-    ]
   },
   "peerDependencies": {
     "@shopify/react-native-skia": "*",
