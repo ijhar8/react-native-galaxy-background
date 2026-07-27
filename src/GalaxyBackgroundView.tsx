@@ -31,16 +31,29 @@ export type GalaxyTheme = 'blue' | 'dark';
 export interface GalaxyBackgroundProps extends ViewProps {
   /**
    * Exact count of small star particles in the field.
-   * Includes a 15% mix of 4-point sparkling star flares ⭐.
+   * Set to `0` to disable stars.
    * @default 200
    */
   numStars?: number;
 
   /**
    * Exact count of soft cosmic dust particles floating in the background layer.
+   * Set to `0` to disable dust.
    * @default 100
    */
   numDust?: number;
+
+  /**
+   * Base radius size (px) for star particles.
+   * @default 0.7
+   */
+  starRadius?: number;
+
+  /**
+   * Base radius size (px) for cosmic dust particles.
+   * @default 0.5
+   */
+  dustRadius?: number;
 
   /**
    * Flow movement direction for all star and dust particles.
@@ -51,7 +64,6 @@ export interface GalaxyBackgroundProps extends ViewProps {
 
   /**
    * Global particle motion speed multiplier.
-   * Increase for faster movement (e.g. `2.0`), decrease for slower drift (e.g. `0.5`).
    * @default 1.0
    */
   speedMultiplier?: number;
@@ -68,9 +80,6 @@ export interface GalaxyBackgroundProps extends ViewProps {
   children?: React.ReactNode;
 }
 
-/**
- * Internal star configuration object.
- */
 export type StarConfig = {
   x: number;
   y: number;
@@ -86,9 +95,6 @@ export type StarConfig = {
   randomAngle: number;
 };
 
-/**
- * Internal dust particle configuration object.
- */
 export type DustConfig = {
   x: number;
   y: number;
@@ -264,34 +270,11 @@ const CosmicDust = React.memo(({
   return <Circle cx={cx} cy={cy} r={dust.r} color="#a6f5ea" opacity={opacity} />;
 });
 
-/**
- * High-Performance 60 FPS GPU-Accelerated Galaxy Background Component for React Native / Expo.
- *
- * Uses `@shopify/react-native-skia` for GPU rendering and `react-native-reanimated` worklets
- * for native C++ UI-thread frame calculations with ZERO JS thread overhead.
- *
- * @example
- * ```tsx
- * import GalaxyBackgroundView from 'react-native-galaxy-background';
- *
- * export default function Screen() {
- *   return (
- *     <GalaxyBackgroundView
- *       numStars={200}
- *       numDust={100}
- *       direction="360"
- *       speedMultiplier={1.0}
- *       theme="blue"
- *     >
- *       <Text style={{ color: '#fff' }}>Hello Galaxy!</Text>
- *     </GalaxyBackgroundView>
- *   );
- * }
- * ```
- */
 export default function GalaxyBackgroundView({
   numStars = 200,
   numDust = 100,
+  starRadius = 0.7,
+  dustRadius = 0.5,
   direction = '360',
   speedMultiplier = 1.0,
   children,
@@ -311,8 +294,9 @@ export default function GalaxyBackgroundView({
     }
   });
 
-  // Precalculate Stars
+  // Precalculate Stars (Handles numStars = 0 cleanly)
   const stars = useMemo(() => {
+    if (numStars <= 0) return [];
     const maxRadius = Math.sqrt(w * w + h * h) * 0.65;
     return Array.from({ length: numStars }).map((): StarConfig => {
       const distRatio = Math.pow(Math.random(), 0.5);
@@ -326,9 +310,9 @@ export default function GalaxyBackgroundView({
       return {
         x,
         y,
-        r: isSparkle ? 1.0 : Math.random() * 0.4 + 0.4,
+        r: isSparkle ? starRadius * 1.4 : starRadius * (Math.random() * 0.5 + 0.75),
         isSparkle,
-        sparkleSize: Math.random() * 2.5 + 2.0,
+        sparkleSize: starRadius * 3.5,
         phase: Math.random() * Math.PI * 2,
         speed: Math.random() * 0.8 + 0.3,
         driftSpeed: Math.random() * 0.5 + 0.15,
@@ -338,10 +322,11 @@ export default function GalaxyBackgroundView({
         randomAngle: Math.random() * Math.PI * 2,
       };
     });
-  }, [numStars, w, h, center]);
+  }, [numStars, starRadius, w, h, center]);
 
-  // Precalculate Dust Particles
+  // Precalculate Dust Particles (Handles numDust = 0 cleanly)
   const dustParticles = useMemo(() => {
+    if (numDust <= 0) return [];
     const maxRadius = Math.sqrt(w * w + h * h) * 0.7;
     return Array.from({ length: numDust }).map((): DustConfig => {
       const orbitRadius = Math.random() * maxRadius;
@@ -352,7 +337,7 @@ export default function GalaxyBackgroundView({
       return {
         x,
         y,
-        r: Math.random() * 0.8 + 0.3,
+        r: dustRadius * (Math.random() * 0.6 + 0.7),
         phase: Math.random() * Math.PI * 2,
         speed: Math.random() * 0.6 + 0.2,
         driftSpeed: Math.random() * 0.4 + 0.1,
@@ -362,11 +347,11 @@ export default function GalaxyBackgroundView({
         randomAngle: Math.random() * Math.PI * 2,
       };
     });
-  }, [numDust, w, h, center]);
+  }, [numDust, dustRadius, w, h, center]);
 
   const gradientColors =
     theme === 'blue'
-      ? ['#6ee2d5', '#28B3A3', '#1b5f8c', '#0f315a', '#061733', '#030a1c']
+      ? ['#6ee2d5', '#28B3A3', '#1b5f8c', '#0f3866', '#061733', '#030a1c']
       : ['#1a1a2e', '#16213e', '#0f3460', '#030712'];
 
   return (
