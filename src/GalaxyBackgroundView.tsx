@@ -9,8 +9,10 @@ const SCREEN = Dimensions.get('window');
 export type GalaxyDirection = 'still' | 'bottom' | 'top' | 'left' | 'right' | '360' | 'random';
 
 export interface GalaxyBackgroundProps extends ViewProps {
-  /** Number of small particles. @default 200 */
+  /** Number of small star particles. @default 200 */
   numStars?: number;
+  /** Number of soft cosmic dust particles. @default 100 */
+  numDust?: number;
   /** Particle movement direction: 'still' | 'bottom' | 'top' | 'left' | 'right' | '360' | 'random'. @default '360' */
   direction?: GalaxyDirection;
   /** Speed multiplier for particle movement. @default 1.0 */
@@ -34,6 +36,19 @@ type StarConfig = {
   randomAngle: number;
 };
 
+type DustConfig = {
+  x: number;
+  y: number;
+  r: number;
+  phase: number;
+  speed: number;
+  driftSpeed: number;
+  orbitRadius: number;
+  orbitAngle: number;
+  orbitSpeed: number;
+  randomAngle: number;
+};
+
 // ─── 4-Point Star Flare Skia Path Generator ───
 function createSparklePath(cx: number, cy: number, size: number) {
   const path = Skia.Path.Make();
@@ -45,6 +60,60 @@ function createSparklePath(cx: number, cy: number, size: number) {
   path.quadTo(cx, cy, cx, cy - s);
   path.close();
   return path;
+}
+
+// ─── Native UI Thread Particle Worklet Motion Helper ───
+function useParticlePosition(
+  config: {
+    x: number;
+    y: number;
+    driftSpeed: number;
+    orbitAngle: number;
+    orbitSpeed: number;
+    orbitRadius: number;
+    randomAngle: number;
+  },
+  time: SharedValue<number>,
+  center: { x: number; y: number },
+  w: number,
+  h: number,
+  direction: GalaxyDirection,
+  speedMultiplier: number
+) {
+  return useDerivedValue(() => {
+    'worklet';
+    const t = time.value * config.driftSpeed * speedMultiplier;
+    let x = config.x;
+    let y = config.y;
+
+    if (direction === 'still') {
+      x = config.x;
+      y = config.y;
+    } else if (direction === 'bottom') {
+      y = config.y - t * 15;
+      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
+    } else if (direction === 'top') {
+      y = config.y + t * 15;
+      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
+    } else if (direction === 'left') {
+      x = config.x - t * 15;
+      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
+    } else if (direction === 'right') {
+      x = config.x + t * 15;
+      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
+    } else if (direction === '360') {
+      const currentAngle = config.orbitAngle + time.value * config.orbitSpeed * speedMultiplier;
+      x = center.x + Math.cos(currentAngle) * config.orbitRadius;
+      y = center.y + Math.sin(currentAngle) * config.orbitRadius;
+    } else if (direction === 'random') {
+      x = config.x + Math.cos(config.randomAngle) * t * 12;
+      y = config.y + Math.sin(config.randomAngle) * t * 12;
+      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
+      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
+    }
+
+    return { x, y };
+  });
 }
 
 // ─── Native UI Thread Star Particle Component ───
@@ -65,47 +134,7 @@ const GalaxyStar = React.memo(({
   direction: GalaxyDirection;
   speedMultiplier: number;
 }) => {
-  // Off-JS-Thread Worklet calculating dynamic position based on direction prop
-  const pos = useDerivedValue(() => {
-    'worklet';
-    const t = time.value * star.driftSpeed * speedMultiplier;
-    let x = star.x;
-    let y = star.y;
-
-    if (direction === 'still') {
-      x = star.x;
-      y = star.y;
-    } else if (direction === 'bottom') {
-      // Flow from bottom to top
-      y = star.y - t * 15;
-      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
-    } else if (direction === 'top') {
-      // Flow from top to bottom
-      y = star.y + t * 15;
-      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
-    } else if (direction === 'left') {
-      // Flow from right to left
-      x = star.x - t * 15;
-      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
-    } else if (direction === 'right') {
-      // Flow from left to right
-      x = star.x + t * 15;
-      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
-    } else if (direction === '360') {
-      // 360-degree orbit around center
-      const currentAngle = star.orbitAngle + time.value * star.orbitSpeed * speedMultiplier;
-      x = center.x + Math.cos(currentAngle) * star.orbitRadius;
-      y = center.y + Math.sin(currentAngle) * star.orbitRadius;
-    } else if (direction === 'random') {
-      // Random direction vector flow
-      x = star.x + Math.cos(star.randomAngle) * t * 12;
-      y = star.y + Math.sin(star.randomAngle) * t * 12;
-      x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
-      y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
-    }
-
-    return { x, y };
-  });
+  const pos = useParticlePosition(star, time, center, w, h, direction, speedMultiplier);
 
   const cx = useDerivedValue(() => {
     'worklet';
@@ -117,7 +146,6 @@ const GalaxyStar = React.memo(({
     return pos.value.y;
   });
 
-  // Smooth non-blinking breathing opacity
   const opacity = useDerivedValue(() => {
     'worklet';
     const v = (Math.sin(time.value * star.speed + star.phase) + 1) / 2;
@@ -144,8 +172,48 @@ const GalaxyStar = React.memo(({
   return <Circle cx={cx} cy={cy} r={star.r} color="#ffffff" opacity={opacity} />;
 });
 
+// ─── Native UI Thread Cosmic Dust Particle Component ───
+const CosmicDust = React.memo(({
+  dust,
+  time,
+  center,
+  w,
+  h,
+  direction,
+  speedMultiplier,
+}: {
+  dust: DustConfig;
+  time: SharedValue<number>;
+  center: { x: number; y: number };
+  w: number;
+  h: number;
+  direction: GalaxyDirection;
+  speedMultiplier: number;
+}) => {
+  const pos = useParticlePosition(dust, time, center, w, h, direction, speedMultiplier);
+
+  const cx = useDerivedValue(() => {
+    'worklet';
+    return pos.value.x;
+  });
+
+  const cy = useDerivedValue(() => {
+    'worklet';
+    return pos.value.y;
+  });
+
+  const opacity = useDerivedValue(() => {
+    'worklet';
+    const v = (Math.sin(time.value * dust.speed + dust.phase) + 1) / 2;
+    return 0.15 + v * 0.35;
+  });
+
+  return <Circle cx={cx} cy={cy} r={dust.r} color="#a6f5ea" opacity={opacity} />;
+});
+
 export default function GalaxyBackgroundView({
   numStars = 200,
+  numDust = 100,
   direction = '360',
   speedMultiplier = 1.0,
   children,
@@ -165,14 +233,14 @@ export default function GalaxyBackgroundView({
     }
   });
 
-  // Precalculate star positions and motion parameters
+  // Precalculate Stars
   const stars = useMemo(() => {
     const maxRadius = Math.sqrt(w * w + h * h) * 0.65;
     return Array.from({ length: numStars }).map((): StarConfig => {
       const distRatio = Math.pow(Math.random(), 0.5);
       const orbitRadius = distRatio * maxRadius;
       const orbitAngle = Math.random() * Math.PI * 2;
-      const isSparkle = Math.random() < 0.15; // 15% subtle 4-point sparkles ⭐
+      const isSparkle = Math.random() < 0.15;
 
       const x = center.x + Math.cos(orbitAngle) * orbitRadius;
       const y = center.y + Math.sin(orbitAngle) * orbitRadius;
@@ -193,6 +261,30 @@ export default function GalaxyBackgroundView({
       };
     });
   }, [numStars, w, h, center]);
+
+  // Precalculate Dust Particles
+  const dustParticles = useMemo(() => {
+    const maxRadius = Math.sqrt(w * w + h * h) * 0.7;
+    return Array.from({ length: numDust }).map((): DustConfig => {
+      const orbitRadius = Math.random() * maxRadius;
+      const orbitAngle = Math.random() * Math.PI * 2;
+      const x = center.x + Math.cos(orbitAngle) * orbitRadius;
+      const y = center.y + Math.sin(orbitAngle) * orbitRadius;
+
+      return {
+        x,
+        y,
+        r: Math.random() * 0.8 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.6 + 0.2,
+        driftSpeed: Math.random() * 0.4 + 0.1,
+        orbitRadius,
+        orbitAngle,
+        orbitSpeed: (Math.random() * 0.015 + 0.004) * (Math.random() < 0.5 ? 1 : -1),
+        randomAngle: Math.random() * Math.PI * 2,
+      };
+    });
+  }, [numDust, w, h, center]);
 
   const gradientColors =
     theme === 'blue'
@@ -217,7 +309,21 @@ export default function GalaxyBackgroundView({
           <Blur blur={50} />
         </Circle>
 
-        {/* Dynamic Multi-Directional Particles */}
+        {/* Dynamic Cosmic Dust Particles */}
+        {dustParticles.map((dust, i) => (
+          <CosmicDust
+            key={`d-${i}`}
+            dust={dust}
+            time={time}
+            center={center}
+            w={w}
+            h={h}
+            direction={direction}
+            speedMultiplier={speedMultiplier}
+          />
+        ))}
+
+        {/* Dynamic Star Particles */}
         {stars.map((star, i) => (
           <GalaxyStar
             key={`s-${i}`}
