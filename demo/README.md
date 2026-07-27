@@ -9,7 +9,7 @@ Powered by **React Native Skia** for GPU canvas rendering and **React Native Rea
 ## ✨ Features
 
 - ⚡ **60–120 FPS Native Performance**: Powered by `@shopify/react-native-skia` GPU canvas & C++ Reanimated UI-thread worklets (`'worklet'`). Zero JS thread frame drops.
-- 🌌 **Deep Space Galaxy Aesthetics**: Soft GPU blur nebula gas clouds (`#28B3A3` cyan/teal to deep space midnight navy) and 4-point sparkling star flares ⭐.
+- 🌌 **Deep Space Galaxy Aesthetics**: Soft GPU blur nebula gas clouds, 4-point sparkling star flares ⭐, and customizable theme palettes (`'blue'`, `'sunset'` / `'orange'`, `'dark'`).
 - 🔄 **7 Flow Direction Modes**: Supports `'still'`, `'bottom'`, `'top'`, `'left'`, `'right'`, `'360'`, and `'random'` particle motion modes.
 - 🎛️ **Granular Particle Controls**: Independently configure star counts (`numStars`), dust counts (`numDust`), star radius (`starRadius`), dust radius (`dustRadius`), and motion speed (`speedMultiplier`).
 - 📦 **TypeScript Ready**: Full TSDoc comments and exported TypeScript types for instant IDE auto-complete / IntelliSense.
@@ -33,7 +33,9 @@ npx expo install react-native-galaxy-background @shopify/react-native-skia react
 
 ---
 
-## 🚀 Quick Usage
+## 🚀 Usage Examples
+
+### Example 1: Standard Blue Galaxy (Teal/Cyan `#28B3A3`)
 
 ```tsx
 import React from 'react';
@@ -51,7 +53,38 @@ export default function App() {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to the Galaxy</Text>
+        <Text style={styles.title}>Blue Galaxy</Text>
+      </View>
+    </GalaxyBackgroundView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { color: '#ffffff', fontSize: 28, fontWeight: 'bold' },
+});
+```
+
+### Example 2: Warm Amber / Sunset Orange Cosmic Sky 🌅
+
+```tsx
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import GalaxyBackgroundView from 'react-native-galaxy-background';
+
+export default function SunsetApp() {
+  return (
+    <GalaxyBackgroundView
+      numStars={250}
+      numDust={120}
+      direction="random"
+      speedMultiplier={0.8}
+      theme="sunset" // Or theme="orange"
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>Sunset Cosmic Sky</Text>
       </View>
     </GalaxyBackgroundView>
   );
@@ -76,7 +109,7 @@ const styles = StyleSheet.create({
 | `dustRadius` | `number` | `0.5` | Base radius size (in pixels) for cosmic dust particles. |
 | `direction` | `GalaxyDirection` | `'360'` | Particle flow direction: `'still'`, `'bottom'`, `'top'`, `'left'`, `'right'`, `'360'`, `'random'`. |
 | `speedMultiplier`| `number` | `1.0` | Global particle movement speed multiplier. |
-| `theme` | `GalaxyTheme` | `'blue'` | Background color gradient theme: `'blue'` (teal/cyan `#28B3A3`) or `'dark'`. |
+| `theme` | `GalaxyTheme` | `'blue'` | Background color gradient theme: `'blue'`, `'sunset'` / `'orange'`, `'dark'`. |
 | `children` | `ReactNode` | `undefined` | Foreground UI components rendered above the background canvas. |
 | `style` | `ViewStyle` | `undefined` | Container view style overrides. |
 

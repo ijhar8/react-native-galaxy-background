@@ -21,9 +21,10 @@ export type GalaxyDirection = 'still' | 'bottom' | 'top' | 'left' | 'right' | '3
 /**
  * Gradient background color theme.
  * - `'blue'`: Deep space cyan-teal `#28B3A3` gradient.
+ * - `'sunset'` / `'orange'`: Cosmic warm amber orange sunset gradient.
  * - `'dark'`: Dark space midnight dark gradient.
  */
-export type GalaxyTheme = 'blue' | 'dark';
+export type GalaxyTheme = 'blue' | 'dark' | 'sunset' | 'orange';
 
 /**
  * Props for the `GalaxyBackgroundView` component.
@@ -64,12 +65,14 @@ export interface GalaxyBackgroundProps extends ViewProps {
 
   /**
    * Global particle motion speed multiplier.
+   * Increase for faster movement (e.g. `2.0`), decrease for slower drift (e.g. `0.5`).
    * @default 1.0
    */
   speedMultiplier?: number;
 
   /**
    * Color theme palette for the background gradient.
+   * Options: `'blue'` | `'sunset'` | `'orange'` | `'dark'`
    * @default 'blue'
    */
   theme?: GalaxyTheme;
@@ -240,6 +243,7 @@ const CosmicDust = React.memo(({
   h,
   direction,
   speedMultiplier,
+  dustColor,
 }: {
   dust: DustConfig;
   time: SharedValue<number>;
@@ -248,6 +252,7 @@ const CosmicDust = React.memo(({
   h: number;
   direction: GalaxyDirection;
   speedMultiplier: number;
+  dustColor: string;
 }) => {
   const pos = useParticlePosition(dust, time, center, w, h, direction, speedMultiplier);
 
@@ -267,7 +272,7 @@ const CosmicDust = React.memo(({
     return 0.15 + v * 0.35;
   });
 
-  return <Circle cx={cx} cy={cy} r={dust.r} color="#a6f5ea" opacity={opacity} />;
+  return <Circle cx={cx} cy={cy} r={dust.r} color={dustColor} opacity={opacity} />;
 });
 
 export default function GalaxyBackgroundView({
@@ -349,10 +354,22 @@ export default function GalaxyBackgroundView({
     });
   }, [numDust, dustRadius, w, h, center]);
 
-  const gradientColors =
-    theme === 'blue'
-      ? ['#6ee2d5', '#28B3A3', '#1b5f8c', '#0f3866', '#061733', '#030a1c']
-      : ['#1a1a2e', '#16213e', '#0f3460', '#030712'];
+  // Theme Gradient Colors
+  const gradientColors = useMemo(() => {
+    if (theme === 'sunset' || theme === 'orange') {
+      return ['#ffab73', '#ff7b54', '#d83a56', '#661052', '#2c003e', '#0a0017'];
+    }
+    if (theme === 'dark') {
+      return ['#1a1a2e', '#16213e', '#0f3460', '#030712'];
+    }
+    // Default 'blue'
+    return ['#6ee2d5', '#28B3A3', '#1b5f8c', '#0f3866', '#061733', '#030a1c'];
+  }, [theme]);
+
+  // Theme Nebula Gas & Dust Colors
+  const nebulaColor1 = (theme === 'sunset' || theme === 'orange') ? 'rgba(255, 123, 84, 0.25)' : 'rgba(40, 179, 163, 0.22)';
+  const nebulaColor2 = (theme === 'sunset' || theme === 'orange') ? 'rgba(255, 171, 115, 0.18)' : 'rgba(110, 235, 217, 0.15)';
+  const dustColor = (theme === 'sunset' || theme === 'orange') ? '#ffe2a6' : '#a6f5ea';
 
   return (
     <View style={[styles.container, style]} {...props}>
@@ -368,8 +385,11 @@ export default function GalaxyBackgroundView({
         </Rect>
 
         {/* Soft Glowing Center Nebula Gas */}
-        <Circle cx={center.x} cy={center.y + 40} r={w * 0.75} color="rgba(40, 179, 163, 0.22)">
+        <Circle cx={center.x} cy={center.y + 40} r={w * 0.75} color={nebulaColor1}>
           <Blur blur={50} />
+        </Circle>
+        <Circle cx={center.x - 30} cy={center.y - 60} r={w * 0.5} color={nebulaColor2}>
+          <Blur blur={35} />
         </Circle>
 
         {/* Dynamic Cosmic Dust Particles */}
@@ -383,6 +403,7 @@ export default function GalaxyBackgroundView({
             h={h}
             direction={direction}
             speedMultiplier={speedMultiplier}
+            dustColor={dustColor}
           />
         ))}
 
