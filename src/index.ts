@@ -1,4 +1,19 @@
-import GalaxyBackgroundView, { GalaxyBackgroundProps } from './GalaxyBackgroundView';
+import GalaxyBackgroundView from './GalaxyBackgroundView';
+import type {
+  GalaxyBackgroundProps,
+  GalaxyDirection,
+  GalaxyTheme,
+  StarConfig,
+  DustConfig,
+} from './GalaxyBackgroundView';
 
-export { GalaxyBackgroundView, GalaxyBackgroundProps };
+export {
+  GalaxyBackgroundView,
+  GalaxyBackgroundProps,
+  GalaxyDirection,
+  GalaxyTheme,
+  StarConfig,
+  DustConfig,
+};
+
 export default GalaxyBackgroundView;

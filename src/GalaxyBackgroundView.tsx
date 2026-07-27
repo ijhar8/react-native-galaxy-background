@@ -6,22 +6,72 @@ import type { ViewProps } from 'react-native';
 
 const SCREEN = Dimensions.get('window');
 
+/**
+ * Particle flow direction mode for the Galaxy Background.
+ * - `'still'`: Particles stay in fixed positions (subtle twinkling breathing opacity only).
+ * - `'bottom'`: Particles drift continuously from bottom to top (upward flow).
+ * - `'top'`: Particles drift continuously from top to bottom (downward flow).
+ * - `'left'`: Particles drift continuously from right to left (leftward flow).
+ * - `'right'`: Particles drift continuously from left to right (rightward flow).
+ * - `'360'`: Particles orbit in a continuous 360-degree spiral galaxy vortex around screen center.
+ * - `'random'`: Particles move in multi-directional floating random vectors.
+ */
 export type GalaxyDirection = 'still' | 'bottom' | 'top' | 'left' | 'right' | '360' | 'random';
 
+/**
+ * Gradient background color theme.
+ * - `'blue'`: Deep space cyan-teal `#28B3A3` gradient.
+ * - `'dark'`: Dark space midnight dark gradient.
+ */
+export type GalaxyTheme = 'blue' | 'dark';
+
+/**
+ * Props for the `GalaxyBackgroundView` component.
+ */
 export interface GalaxyBackgroundProps extends ViewProps {
-  /** Number of small star particles. @default 200 */
+  /**
+   * Exact count of small star particles in the field.
+   * Includes a 15% mix of 4-point sparkling star flares ⭐.
+   * @default 200
+   */
   numStars?: number;
-  /** Number of soft cosmic dust particles. @default 100 */
+
+  /**
+   * Exact count of soft cosmic dust particles floating in the background layer.
+   * @default 100
+   */
   numDust?: number;
-  /** Particle movement direction: 'still' | 'bottom' | 'top' | 'left' | 'right' | '360' | 'random'. @default '360' */
+
+  /**
+   * Flow movement direction for all star and dust particles.
+   * Options: `'still'` | `'bottom'` | `'top'` | `'left'` | `'right'` | `'360'` | `'random'`
+   * @default '360'
+   */
   direction?: GalaxyDirection;
-  /** Speed multiplier for particle movement. @default 1.0 */
+
+  /**
+   * Global particle motion speed multiplier.
+   * Increase for faster movement (e.g. `2.0`), decrease for slower drift (e.g. `0.5`).
+   * @default 1.0
+   */
   speedMultiplier?: number;
+
+  /**
+   * Color theme palette for the background gradient.
+   * @default 'blue'
+   */
+  theme?: GalaxyTheme;
+
+  /**
+   * React children components rendered in the foreground above the GPU Canvas.
+   */
   children?: React.ReactNode;
-  theme?: 'blue' | 'dark';
 }
 
-type StarConfig = {
+/**
+ * Internal star configuration object.
+ */
+export type StarConfig = {
   x: number;
   y: number;
   r: number;
@@ -36,7 +86,10 @@ type StarConfig = {
   randomAngle: number;
 };
 
-type DustConfig = {
+/**
+ * Internal dust particle configuration object.
+ */
+export type DustConfig = {
   x: number;
   y: number;
   r: number;
@@ -211,6 +264,31 @@ const CosmicDust = React.memo(({
   return <Circle cx={cx} cy={cy} r={dust.r} color="#a6f5ea" opacity={opacity} />;
 });
 
+/**
+ * High-Performance 60 FPS GPU-Accelerated Galaxy Background Component for React Native / Expo.
+ *
+ * Uses `@shopify/react-native-skia` for GPU rendering and `react-native-reanimated` worklets
+ * for native C++ UI-thread frame calculations with ZERO JS thread overhead.
+ *
+ * @example
+ * ```tsx
+ * import GalaxyBackgroundView from 'react-native-galaxy-background';
+ *
+ * export default function Screen() {
+ *   return (
+ *     <GalaxyBackgroundView
+ *       numStars={200}
+ *       numDust={100}
+ *       direction="360"
+ *       speedMultiplier={1.0}
+ *       theme="blue"
+ *     >
+ *       <Text style={{ color: '#fff' }}>Hello Galaxy!</Text>
+ *     </GalaxyBackgroundView>
+ *   );
+ * }
+ * ```
+ */
 export default function GalaxyBackgroundView({
   numStars = 200,
   numDust = 100,
