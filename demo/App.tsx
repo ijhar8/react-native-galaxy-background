@@ -99,11 +99,11 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      {/* ⚡ TESTING WITH 10,000 PARTICLES USING GPU INSTANCED BATCHING MODE ⚡ */}
+      {/* ⚡ TESTING WITH 5,000 COSMIC DUST PARTICLES + 3,000 STARS ⚡ */}
       <GalaxyBackgroundView
         theme="orange"
-        numStars={6000}
-        numDust={4000}
+        numStars={3000}
+        numDust={5000}
         direction="360"
         speedMultiplier={1.0}
         style={styles.container}
