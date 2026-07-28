@@ -45,6 +45,10 @@ import GalaxyBackgroundView, { VideoBackground, VideoPoolProvider } from 'react-
 ### Option B: Copy Components Directly into Your Codebase 📂
 If you prefer zero external package dependencies or want full customization control, simply **copy the source files directly into your project**:
 
+> 💡 **100% Modular & Independent**: Both components are completely decoupled!
+> - Want **only Video Background**? Copy `src/VideoBackground/` and install `expo-video` + `react-native-reanimated`. (Skia is NOT required!)
+> - Want **only Galaxy Skia Background**? Copy `src/GalaxyBackgroundView.tsx` and install `@shopify/react-native-skia` + `react-native-reanimated`. (`expo-video` is NOT required!)
+
 1. **Copy Component Files**:
    - For Video Background: Copy `src/VideoBackground/` → `components/VideoBackground/`
    - For Galaxy Skia Background: Copy `src/GalaxyBackgroundView.tsx` → `components/GalaxyBackgroundView.tsx`
