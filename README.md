@@ -9,9 +9,11 @@ Powered by **React Native Skia** for GPU canvas rendering and **React Native Rea
 ## ✨ Features
 
 - ⚡ **60–120 FPS Native Performance**: Powered by `@shopify/react-native-skia` GPU canvas & C++ Reanimated UI-thread worklets (`'worklet'`). Zero JS thread frame drops.
+- 🎬 **Video Background System (`expo-video`)**: Production-grade `<VideoBackground>` component with Reanimated poster cross-fade, Android `surfaceType="textureView"` z-fighting fix, and focus-aware auto-pause.
+- 🏊 **Global Video Player Pool (`VideoPoolProvider`)**: Pre-warm native video decoders at app startup to eliminate video loading delay (~0ms playback).
 - 🌌 **Deep Space Galaxy Aesthetics**: Soft GPU blur nebula gas clouds, 4-point sparkling star flares ⭐, and customizable theme palettes (`'blue'`, `'sunset'` / `'orange'`, `'dark'`).
 - 🔄 **7 Flow Direction Modes**: Supports `'still'`, `'bottom'`, `'top'`, `'left'`, `'right'`, `'360'`, and `'random'` particle motion modes.
-- 🎛️ **Granular Particle Controls**: Independently configure star counts (`numStars`), dust counts (`numDust`), star radius (`starRadius`), dust radius (`dustRadius`), and motion speed (`speedMultiplier`).
+- 🎛️ **Granular Controls**: Independently configure star counts (`numStars`), dust counts (`numDust`), star radius (`starRadius`), dust radius (`dustRadius`), and motion speed (`speedMultiplier`).
 - 📦 **TypeScript Ready**: Full TSDoc comments and exported TypeScript types for instant IDE auto-complete / IntelliSense.
 
 ---
@@ -20,16 +22,16 @@ Powered by **React Native Skia** for GPU canvas rendering and **React Native Rea
 
 ```bash
 # npm
-npm install react-native-galaxy-background @shopify/react-native-skia react-native-reanimated
+npm install react-native-galaxy-background @shopify/react-native-skia react-native-reanimated expo-video
 
 # yarn
-yarn add react-native-galaxy-background @shopify/react-native-skia react-native-reanimated
+yarn add react-native-galaxy-background @shopify/react-native-skia react-native-reanimated expo-video
 
 # expo
-npx expo install react-native-galaxy-background @shopify/react-native-skia react-native-reanimated
+npx expo install react-native-galaxy-background @shopify/react-native-skia react-native-reanimated expo-video
 ```
 
-> **Note**: Requires `@shopify/react-native-skia` (>= 1.0.0) and `react-native-reanimated` (>= 3.0.0).
+> **Note**: Requires `@shopify/react-native-skia` (>= 1.0.0), `react-native-reanimated` (>= 3.0.0), and `expo-video` (>= 2.0.0).
 
 ---
 
@@ -87,6 +89,46 @@ export default function SunsetApp() {
         <Text style={styles.title}>Sunset Cosmic Sky</Text>
       </View>
     </GalaxyBackgroundView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { color: '#ffffff', fontSize: 28, fontWeight: 'bold' },
+});
+```
+
+### Example 3: Hardware-Decoded Video Background 🎬
+
+```tsx
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { VideoBackground, VideoPoolProvider } from 'react-native-galaxy-background';
+import { useIsFocused } from '@react-navigation/native';
+
+export default function App() {
+  return (
+    // Pre-warm decoders at app startup (optional)
+    <VideoPoolProvider preload={[
+      { key: 'splash', source: require('./assets/deep_space.mp4') },
+    ]}>
+      <VideoBackground
+        poolKey="splash"
+        source={require('./assets/deep_space.mp4')}
+        posterSource={require('./assets/deep_space_poster.jpg')}
+        isLooping={true}
+        isMuted={true}
+        contentFit="cover"
+        fadeDuration={600}
+        isFocused={useIsFocused()} // Auto-pauses on screen blur
+        style={styles.container}
+      >
+        <View style={styles.content}>
+          <Text style={styles.title}>Deep Space Video</Text>
+        </View>
+      </VideoBackground>
+    </VideoPoolProvider>
   );
 }
 
