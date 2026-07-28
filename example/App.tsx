@@ -45,6 +45,7 @@ export default function App() {
 
 function VideoDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [isReady, setIsReady] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
 
   const handleReady = useCallback(() => {
     setIsReady(true);
@@ -54,7 +55,7 @@ function VideoDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
     <VideoBackground
       source={require('./assets/deep_space.mp4')}
       posterSource={require('./assets/deep_space_poster.jpg')}
-      isLooping={true}
+      isLooping={isLooping}
       isMuted={true}
       contentFit="cover"
       fadeDuration={800}
@@ -84,6 +85,31 @@ function VideoDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
             Native GPU video playback with Reanimated poster cross-fade, Android
             TextureView z-fighting fix, and focus-aware battery optimization.
           </Text>
+
+          {/* Loop Mode Control */}
+          <View style={styles.controlGroup}>
+            <Text style={styles.controlLabel}>Loop Playback</Text>
+            <View style={styles.pillRow}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setIsLooping(false)}
+                style={[styles.pillBtn, !isLooping && styles.pillBtnActive]}
+              >
+                <Text style={[styles.pillText, !isLooping && styles.pillTextActive]}>
+                  Loop: OFF 🛑
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setIsLooping(true)}
+                style={[styles.pillBtn, isLooping && styles.pillBtnActive]}
+              >
+                <Text style={[styles.pillText, isLooping && styles.pillTextActive]}>
+                  Loop: ON 🔁
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           <View style={styles.featureRow}>
             <FeatureChip icon="🖼" label="Poster Cross-Fade" />
