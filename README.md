@@ -18,7 +18,12 @@ Powered by **React Native Skia** for GPU canvas rendering and **React Native Rea
 
 ---
 
-## 📦 Installation
+## 🛠️ Two Flexible Integration Options
+
+You can use this project in **two ways** depending on your team's workflow:
+
+### Option A: Install as an NPM Library 📦
+Install the published package directly from npm:
 
 ```bash
 # npm
@@ -31,7 +36,29 @@ yarn add react-native-galaxy-background @shopify/react-native-skia react-native-
 npx expo install react-native-galaxy-background @shopify/react-native-skia react-native-reanimated expo-video
 ```
 
-> **Note**: Requires `@shopify/react-native-skia` (>= 1.0.0), `react-native-reanimated` (>= 3.0.0), and `expo-video` (>= 2.0.0).
+```tsx
+import GalaxyBackgroundView, { VideoBackground, VideoPoolProvider } from 'react-native-galaxy-background';
+```
+
+---
+
+### Option B: Copy Components Directly into Your Codebase 📂
+If you prefer zero external package dependencies or want full customization control, simply **copy the source files directly into your project**:
+
+1. **Copy Component Files**:
+   - For Video Background: Copy `src/VideoBackground/` → `components/VideoBackground/`
+   - For Galaxy Skia Background: Copy `src/GalaxyBackgroundView.tsx` → `components/GalaxyBackgroundView.tsx`
+
+2. **Install Peer Dependencies**:
+   ```bash
+   npx expo install @shopify/react-native-skia react-native-reanimated expo-video
+   ```
+
+3. **Import Locally**:
+   ```tsx
+   import GalaxyBackgroundView from './components/GalaxyBackgroundView';
+   import { VideoBackground, VideoPoolProvider } from './components/VideoBackground';
+   ```
 
 ---
 
