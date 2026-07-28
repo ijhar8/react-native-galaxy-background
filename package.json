@@ -51,6 +51,7 @@
     "eslint": "~9.39.4",
     "eslint-config-universe": "^15.0.3",
     "expo": "^57.0.7",
+    "expo-video": "*",
     "jest": "^29.7.0",
     "jest-expo": "~55.0.9",
     "prettier": "^3.0.0",
@@ -63,8 +64,12 @@
   "peerDependencies": {
     "@shopify/react-native-skia": "*",
     "expo": "*",
+    "expo-video": "*",
     "react": "*",
     "react-native": "*",
     "react-native-reanimated": "*"
+  },
+  "dependencies": {
+    "expo-video": "~57.0.2"
   }
 }

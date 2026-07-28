@@ -17,3 +17,19 @@ export {
 };
 
 export default GalaxyBackgroundView;
+
+// ── VideoBackground Module ─────────────────────────────────────────────────
+export {
+  VideoBackground,
+  VideoPoolProvider,
+  useVideoPool,
+} from './VideoBackground';
+
+export type {
+  VideoBackgroundProps,
+  VideoPoolProviderProps,
+  VideoPoolContextValue,
+  PreloadEntry,
+  VideoPlayerStatus,
+  VideoContentFit,
+} from './VideoBackground';
