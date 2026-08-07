@@ -180,7 +180,9 @@ const styles = StyleSheet.create({
 | `numDust` | `number` | `100` | Exact count of soft cosmic dust particles. Set to `0` to disable dust layer. |
 | `starRadius` | `number` | `0.7` | Base radius size (in pixels) for star particles. |
 | `dustRadius` | `number` | `0.5` | Base radius size (in pixels) for cosmic dust particles. |
-| `direction` | `GalaxyDirection` | `'360'` | Particle flow direction: `'still'`, `'bottom'`, `'top'`, `'left'`, `'right'`, `'360'`, `'random'`. |
+| `direction` | `GalaxyDirection` | `'360'` | Particle flow direction: `'still'`, `'bottom'`, `'top'`, `'left'`, `'right'`, `'360'`, `'random'`, `'zoom-in'`, `'zoom-out'`. |
+| `zoom` | `GalaxyZoom` | `'none'` | Cinematic camera zoom depth: `'none'`, `'in'`, `'out'`, `'breathe'`, `'pulse'`. |
+| `zoomSpeed` | `number` | `1.0` | Camera zoom motion speed multiplier. |
 | `speedMultiplier`| `number` | `1.0` | Global particle movement speed multiplier. |
 | `theme` | `GalaxyTheme` | `'blue'` | Background color gradient theme: `'blue'`, `'sunset'` / `'orange'`, `'dark'`. |
 | `children` | `ReactNode` | `undefined` | Foreground UI components rendered above the background canvas. |
@@ -188,15 +190,26 @@ const styles = StyleSheet.create({
 
 ---
 
-## 🎨 Flow Direction Modes (`direction`)
+## 🎨 Flow Direction & Warp Zoom Modes (`direction`)
 
-- **`'360'`**: Particles orbit in a continuous 360-degree spiral galaxy vortex around the center.
+- **`'zoom-in'` / `'zoom'`**: 🚀 **3D Warp Zoom In** — Particles expand outward from center as if traveling forward through deep space towards the viewer.
+- **`'zoom-out'`**: 🌌 **3D Warp Zoom Out** — Particles contract inward towards the distant center vanishing point as if flying away.
+- **`'360'`**: 🌀 Particles orbit in a continuous 360-degree spiral galaxy vortex around the center.
 - **`'bottom'`**: Particles drift continuously from bottom to top (upward flow).
 - **`'top'`**: Particles drift continuously from top to bottom (downward flow).
 - **`'left'`**: Particles drift continuously from right to left (leftward flow).
 - **`'right'`**: Particles drift continuously from left to right (rightward flow).
 - **`'still'`**: Particles stay in fixed positions with subtle breathing opacity.
 - **`'random'`**: Particles move in multi-directional floating random vectors.
+
+---
+
+## 🔍 Camera Zoom Depth (`zoom`)
+
+- **`'none'`**: Standard motion without camera depth animation.
+- **`'in'`**: Layered forward camera zoom traveling closer to deep space.
+- **`'out'`**: Layered backward camera zoom traveling away into the distance.
+- **`'breathe'` / `'pulse'`**: 🌊 Smooth cinematic oscillatory camera breathing (slow in-and-out depth motion).
 
 ---
 

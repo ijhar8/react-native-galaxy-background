@@ -2,6 +2,7 @@ import GalaxyBackgroundView from './GalaxyBackgroundView';
 import type {
   GalaxyBackgroundProps,
   GalaxyDirection,
+  GalaxyZoom,
   GalaxyTheme,
   StarConfig,
   DustConfig,
@@ -11,6 +12,7 @@ export {
   GalaxyBackgroundView,
   GalaxyBackgroundProps,
   GalaxyDirection,
+  GalaxyZoom,
   GalaxyTheme,
   StarConfig,
   DustConfig,

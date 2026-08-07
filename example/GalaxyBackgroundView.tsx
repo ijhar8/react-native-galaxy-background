@@ -15,8 +15,29 @@ const SCREEN = Dimensions.get('window');
  * - `'right'`: Particles drift continuously from left to right (rightward flow).
  * - `'360'`: Particles orbit in a continuous 360-degree spiral galaxy vortex around screen center.
  * - `'random'`: Particles move in multi-directional floating random vectors.
+ * - `'zoom-in'` / `'zoom'`: Cinematic forward warp zoom (flying forward into deep space towards stars).
+ * - `'zoom-out'`: Cinematic backward zoom (flying away from the galaxy center into the distance).
  */
-export type GalaxyDirection = 'still' | 'bottom' | 'top' | 'left' | 'right' | '360' | 'random';
+export type GalaxyDirection =
+  | 'still'
+  | 'bottom'
+  | 'top'
+  | 'left'
+  | 'right'
+  | '360'
+  | 'random'
+  | 'zoom-in'
+  | 'zoom-out'
+  | 'zoom';
+
+/**
+ * Cinematic camera zoom motion effect.
+ * - `'none'`: Standard motion with no layered camera zoom.
+ * - `'in'`: Continuous forward zoom (traveling closer to deep space).
+ * - `'out'`: Continuous backward zoom (traveling further away from the galaxy).
+ * - `'breathe'` / `'pulse'`: Smooth oscillatory camera breathing (slow cinematic zoom in and out).
+ */
+export type GalaxyZoom = 'none' | 'in' | 'out' | 'breathe' | 'pulse';
 
 /**
  * Gradient background color theme.
@@ -58,10 +79,23 @@ export interface GalaxyBackgroundProps extends ViewProps {
 
   /**
    * Flow movement direction for all star and dust particles.
-   * Options: `'still'` | `'bottom'` | `'top'` | `'left'` | `'right'` | `'360'` | `'random'`
+   * Options: `'still'` | `'bottom'` | `'top'` | `'left'` | `'right'` | `'360'` | `'random'` | `'zoom-in'` | `'zoom-out'` | `'zoom'`
    * @default '360'
    */
   direction?: GalaxyDirection;
+
+  /**
+   * Optional cinematic camera zoom mode. Can be layered on top of any direction mode.
+   * Options: `'none'` | `'in'` | `'out'` | `'breathe'` | `'pulse'`
+   * @default 'none'
+   */
+  zoom?: GalaxyZoom;
+
+  /**
+   * Speed multiplier for the zoom camera animation.
+   * @default 1.0
+   */
+  zoomSpeed?: number;
 
   /**
    * Global particle motion speed multiplier.
@@ -103,6 +137,7 @@ export type StarConfig = {
   orbitAngle: number;
   orbitSpeed: number;
   randomAngle: number;
+  maxRadius: number;
 };
 
 export type DustConfig = {
@@ -116,6 +151,7 @@ export type DustConfig = {
   orbitAngle: number;
   orbitSpeed: number;
   randomAngle: number;
+  maxRadius: number;
 };
 
 // ─── 4-Point Star Flare Skia Path Generator ───
@@ -131,7 +167,7 @@ function createSparklePath(cx: number, cy: number, size: number) {
   return path;
 }
 
-// ─── Native UI Thread Motion Vector Calculation (Pure Worklet) ───
+// ─── Native UI Thread Motion Vector & Depth Zoom Calculation (Pure Worklet) ───
 function calcParticlePos(
   config: {
     x: number;
@@ -141,18 +177,22 @@ function calcParticlePos(
     orbitSpeed: number;
     orbitRadius: number;
     randomAngle: number;
+    maxRadius: number;
   },
   tVal: number,
   center: { x: number; y: number },
   w: number,
   h: number,
   direction: GalaxyDirection,
-  speedMultiplier: number
+  speedMultiplier: number,
+  zoom: GalaxyZoom,
+  zoomSpeed: number
 ) {
   'worklet';
   const t = tVal * config.driftSpeed * speedMultiplier;
   let x = config.x;
   let y = config.y;
+  const maxR = config.maxRadius > 0 ? config.maxRadius : Math.sqrt(w * w + h * h) * 0.65;
 
   if (direction === 'still') {
     x = config.x;
@@ -178,6 +218,34 @@ function calcParticlePos(
     y = config.y + Math.sin(config.randomAngle) * t * 12;
     x = ((x % (w + 30)) + (w + 30)) % (w + 30) - 15;
     y = ((y % (h + 30)) + (h + 30)) % (h + 30) - 15;
+  } else if (direction === 'zoom-in' || direction === 'zoom') {
+    // Warp Zoom In: Particles expand outward from center as if traveling forward in 3D
+    const currentR = ((config.orbitRadius + tVal * 45 * config.driftSpeed * speedMultiplier) % maxR + maxR) % maxR;
+    x = center.x + Math.cos(config.orbitAngle) * currentR;
+    y = center.y + Math.sin(config.orbitAngle) * currentR;
+  } else if (direction === 'zoom-out') {
+    // Warp Zoom Out: Particles contract inward towards distant center vanishing point
+    const currentR = ((config.orbitRadius - tVal * 45 * config.driftSpeed * speedMultiplier) % maxR + maxR) % maxR;
+    x = center.x + Math.cos(config.orbitAngle) * currentR;
+    y = center.y + Math.sin(config.orbitAngle) * currentR;
+  }
+
+  // Layered Camera Zoom Modifiers (applies on top of any direction mode)
+  if (zoom === 'in') {
+    const progress = (tVal * 0.2 * zoomSpeed) % 1;
+    const factor = 1 + progress * 0.8;
+    x = center.x + (x - center.x) * factor;
+    y = center.y + (y - center.y) * factor;
+  } else if (zoom === 'out') {
+    const progress = (tVal * 0.2 * zoomSpeed) % 1;
+    const factor = 1 / (1 + progress * 0.8);
+    x = center.x + (x - center.x) * factor;
+    y = center.y + (y - center.y) * factor;
+  } else if (zoom === 'breathe' || zoom === 'pulse') {
+    // Cinematic camera depth breathing oscillation
+    const factor = 1 + Math.sin(tVal * 0.75 * zoomSpeed) * 0.28;
+    x = center.x + (x - center.x) * factor;
+    y = center.y + (y - center.y) * factor;
   }
 
   return vec(x, y);
@@ -192,6 +260,8 @@ const GalaxyStar = React.memo(({
   h,
   direction,
   speedMultiplier,
+  zoom,
+  zoomSpeed,
 }: {
   star: StarConfig;
   time: SharedValue<number>;
@@ -200,10 +270,12 @@ const GalaxyStar = React.memo(({
   h: number;
   direction: GalaxyDirection;
   speedMultiplier: number;
+  zoom: GalaxyZoom;
+  zoomSpeed: number;
 }) => {
   const pos = useDerivedValue(() => {
     'worklet';
-    return calcParticlePos(star, time.value, center, w, h, direction, speedMultiplier);
+    return calcParticlePos(star, time.value, center, w, h, direction, speedMultiplier, zoom, zoomSpeed);
   });
 
   const cx = useDerivedValue(() => {
@@ -250,6 +322,8 @@ const CosmicDust = React.memo(({
   h,
   direction,
   speedMultiplier,
+  zoom,
+  zoomSpeed,
   dustColor,
 }: {
   dust: DustConfig;
@@ -259,11 +333,13 @@ const CosmicDust = React.memo(({
   h: number;
   direction: GalaxyDirection;
   speedMultiplier: number;
+  zoom: GalaxyZoom;
+  zoomSpeed: number;
   dustColor: string;
 }) => {
   const pos = useDerivedValue(() => {
     'worklet';
-    return calcParticlePos(dust, time.value, center, w, h, direction, speedMultiplier);
+    return calcParticlePos(dust, time.value, center, w, h, direction, speedMultiplier, zoom, zoomSpeed);
   });
 
   const cx = useDerivedValue(() => {
@@ -295,6 +371,8 @@ const BatchedParticlesLayer = React.memo(({
   h,
   direction,
   speedMultiplier,
+  zoom,
+  zoomSpeed,
   starRadius,
   dustRadius,
   dustColor,
@@ -307,6 +385,8 @@ const BatchedParticlesLayer = React.memo(({
   h: number;
   direction: GalaxyDirection;
   speedMultiplier: number;
+  zoom: GalaxyZoom;
+  zoomSpeed: number;
   starRadius: number;
   dustRadius: number;
   dustColor: string;
@@ -317,7 +397,7 @@ const BatchedParticlesLayer = React.memo(({
     const points: SkPoint[] = [];
     const tVal = time.value;
     for (let i = 0; i < stars.length; i++) {
-      points.push(calcParticlePos(stars[i], tVal, center, w, h, direction, speedMultiplier));
+      points.push(calcParticlePos(stars[i], tVal, center, w, h, direction, speedMultiplier, zoom, zoomSpeed));
     }
     return points;
   });
@@ -328,7 +408,7 @@ const BatchedParticlesLayer = React.memo(({
     const points: SkPoint[] = [];
     const tVal = time.value;
     for (let i = 0; i < dustParticles.length; i++) {
-      points.push(calcParticlePos(dustParticles[i], tVal, center, w, h, direction, speedMultiplier));
+      points.push(calcParticlePos(dustParticles[i], tVal, center, w, h, direction, speedMultiplier, zoom, zoomSpeed));
     }
     return points;
   });
@@ -365,6 +445,8 @@ export default function GalaxyBackgroundView({
   starRadius = 0.7,
   dustRadius = 0.5,
   direction = '360',
+  zoom = 'none',
+  zoomSpeed = 1.0,
   speedMultiplier = 1.0,
   useGpuBatching,
   children,
@@ -413,6 +495,7 @@ export default function GalaxyBackgroundView({
         orbitAngle,
         orbitSpeed: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1),
         randomAngle: Math.random() * Math.PI * 2,
+        maxRadius,
       };
     });
   }, [numStars, starRadius, w, h, center]);
@@ -438,6 +521,7 @@ export default function GalaxyBackgroundView({
         orbitAngle,
         orbitSpeed: (Math.random() * 0.015 + 0.004) * (Math.random() < 0.5 ? 1 : -1),
         randomAngle: Math.random() * Math.PI * 2,
+        maxRadius,
       };
     });
   }, [numDust, dustRadius, w, h, center]);
@@ -491,6 +575,8 @@ export default function GalaxyBackgroundView({
             h={h}
             direction={direction}
             speedMultiplier={speedMultiplier}
+            zoom={zoom}
+            zoomSpeed={zoomSpeed}
             starRadius={starRadius}
             dustRadius={dustRadius}
             dustColor={dustColor}
@@ -508,6 +594,8 @@ export default function GalaxyBackgroundView({
                 h={h}
                 direction={direction}
                 speedMultiplier={speedMultiplier}
+                zoom={zoom}
+                zoomSpeed={zoomSpeed}
                 dustColor={dustColor}
               />
             ))}
@@ -521,6 +609,8 @@ export default function GalaxyBackgroundView({
                 h={h}
                 direction={direction}
                 speedMultiplier={speedMultiplier}
+                zoom={zoom}
+                zoomSpeed={zoomSpeed}
               />
             ))}
           </>

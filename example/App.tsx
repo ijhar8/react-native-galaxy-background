@@ -12,6 +12,7 @@ import Animated, { FadeIn, FadeInUp, FadeInDown } from 'react-native-reanimated'
 // ── Galaxy Background (Skia particles) ──
 import GalaxyBackgroundView, {
   GalaxyDirection,
+  GalaxyZoom,
   GalaxyTheme,
 } from './GalaxyBackgroundView';
 
@@ -27,7 +28,7 @@ type DemoMode = 'galaxy' | 'video';
 // ─── App ───────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [mode, setMode] = useState<DemoMode>('video');
+  const [mode, setMode] = useState<DemoMode>('galaxy');
 
   return (
     <>
@@ -140,7 +141,8 @@ function VideoDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
 
 function GalaxyDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [currentTheme, setCurrentTheme] = useState<GalaxyTheme>('blue');
-  const [currentDirection, setCurrentDirection] = useState<GalaxyDirection>('360');
+  const [currentDirection, setCurrentDirection] = useState<GalaxyDirection>('zoom-in');
+  const [currentZoom, setCurrentZoom] = useState<GalaxyZoom>('none');
 
   const themes: { id: GalaxyTheme; name: string }[] = [
     { id: 'blue', name: 'Blue Galaxy 🌌' },
@@ -149,16 +151,26 @@ function GalaxyDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
   ];
 
   const directions: { id: GalaxyDirection; name: string }[] = [
-    { id: '360', name: '360° Orbit' },
+    { id: 'zoom-in', name: 'Warp Zoom In 🚀' },
+    { id: 'zoom-out', name: 'Warp Zoom Out 🌌' },
+    { id: '360', name: '360° Orbit 🌀' },
     { id: 'bottom', name: 'Upward' },
     { id: 'top', name: 'Downward' },
     { id: 'random', name: 'Random' },
+  ];
+
+  const zoomModes: { id: GalaxyZoom; name: string }[] = [
+    { id: 'none', name: 'Standard' },
+    { id: 'in', name: 'Zoom In 🔍' },
+    { id: 'out', name: 'Zoom Out 🔭' },
+    { id: 'breathe', name: 'Breathe / Pulse 🌊' },
   ];
 
   return (
     <GalaxyBackgroundView
       theme={currentTheme}
       direction={currentDirection}
+      zoom={currentZoom}
       numStars={300}
       numDust={150}
       speedMultiplier={1.0}
@@ -177,7 +189,7 @@ function GalaxyDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
           <Text style={styles.heroTitle}>Particle Canvas</Text>
           <Text style={styles.heroSubtitle}>
             React Native Skia & C++ Reanimated Worklets for native 60–120 FPS
-            particle rendering with GPU batched draw calls.
+            particle rendering with 3D Warp Zoom animations.
           </Text>
 
           {/* Theme Pills */}
@@ -199,9 +211,9 @@ function GalaxyDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
             </View>
           </View>
 
-          {/* Direction Pills */}
+          {/* Direction / Warp Zoom Pills */}
           <View style={styles.controlGroup}>
-            <Text style={styles.controlLabel}>Direction</Text>
+            <Text style={styles.controlLabel}>Motion & Warp Zoom</Text>
             <View style={styles.pillRow}>
               {directions.map((d) => (
                 <TouchableOpacity
@@ -212,6 +224,25 @@ function GalaxyDemo({ onSwitchMode }: { onSwitchMode: () => void }) {
                 >
                   <Text style={[styles.pillText, currentDirection === d.id && styles.pillTextActive]}>
                     {d.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Camera Zoom Depth Pills */}
+          <View style={styles.controlGroup}>
+            <Text style={styles.controlLabel}>Camera Zoom Depth</Text>
+            <View style={styles.pillRow}>
+              {zoomModes.map((z) => (
+                <TouchableOpacity
+                  key={z.id}
+                  activeOpacity={0.8}
+                  onPress={() => setCurrentZoom(z.id)}
+                  style={[styles.pillBtn, currentZoom === z.id && styles.pillBtnActive]}
+                >
+                  <Text style={[styles.pillText, currentZoom === z.id && styles.pillTextActive]}>
+                    {z.name}
                   </Text>
                 </TouchableOpacity>
               ))}
