@@ -172,6 +172,69 @@ const styles = StyleSheet.create({
 
 ---
 
+### Example 4: Animated App Splash Screen Launch Sequence 🚀
+
+Use `<GalaxyBackgroundView>` with `direction="zoom-in"` as a high-performance animated splash / launch screen:
+
+```tsx
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image } from 'react-native';
+import Animated, { FadeInUp, FadeOut } from 'react-native-reanimated';
+import * as SplashScreen from 'expo-splash-screen';
+import GalaxyBackgroundView from 'react-native-galaxy-background';
+
+// Keep native splash visible until JS finishes loading
+SplashScreen.preventAutoHideAsync();
+
+export default function AppLaunchScreen({ onFinish }: { onFinish: () => void }) {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      // 1. Hide native splash screen immediately when Skia canvas is ready
+      await SplashScreen.hideAsync();
+      
+      // 2. Simulate auth check / initial data fetch (e.g. 2.5 seconds)
+      setTimeout(() => {
+        setIsReady(true);
+        onFinish();
+      }, 2500);
+    }
+    prepare();
+  }, [onFinish]);
+
+  return (
+    <GalaxyBackgroundView
+      direction="zoom-in"
+      zoom="breathe"
+      numStars={250}
+      numDust={120}
+      speedMultiplier={1.2}
+      theme="blue"
+      style={styles.container}
+    >
+      <Animated.View
+        entering={FadeInUp.duration(800)}
+        exiting={FadeOut.duration(400)}
+        style={styles.splashContent}
+      >
+        <Text style={styles.appTitle}>YOUR APP NAME</Text>
+        <Text style={styles.appSubtitle}>Powered by Galaxy Skia Engine</Text>
+      </Animated.View>
+    </GalaxyBackgroundView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  splashContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  appTitle: { color: '#ffffff', fontSize: 32, fontWeight: '900', letterSpacing: 2 },
+  appSubtitle: { color: '#6ee2d5', fontSize: 13, fontWeight: '600', marginTop: 8, letterSpacing: 1 },
+});
+```
+
+---
+
 ## 🎛️ Props API Reference
 
 | Prop | Type | Default | Description |
